@@ -64,7 +64,11 @@ public interface CommonVillagerModel<T extends LivingEntity> {
 
             if (breastSize > 0) {
                 matrices.pushPose();
-                matrices.scale(1.25f, 1.5f, 1.5f);
+                if (Config.getInstance().useNewBreastSystem) {
+                    matrices.scale(1.25f, 1.5f, 1.5f);
+                } else {
+                    matrices.scale(breastSize * 0.2f + 1.05f, breastSize * 0.75f + 0.75f, breastSize * 0.75f + 0.75f);
+                }
                 for (ModelPart part : getBreastParts()) {
                     part.render(matrices, vertices, light, overlay, color);
                 }
@@ -78,7 +82,7 @@ public interface CommonVillagerModel<T extends LivingEntity> {
         setBreastSize(villager.getGenetics().getBreastSize());
         getBreastPart().visible = villager.getGenetics().getGender() == Gender.FEMALE;
         boolean newSystem = Config.getInstance().useNewBreastSystem;
-        float rotation = newSystem ? 0.3f : 0.3f + (1 + (0.5f - getBreastSize() / 2));
+        float rotation = newSystem ? 0.3f + (1 + (0.5f - getBreastSize() / 2)) : 0.3f;
         float xRot = (float) Math.PI * rotation + getBodyPart().xRot;
 
         for (ModelPart part : getBreastParts()) {
