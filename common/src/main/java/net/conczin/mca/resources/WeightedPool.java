@@ -1,7 +1,5 @@
 package net.conczin.mca.resources;
 
-import net.conczin.mca.MCA;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,12 +15,9 @@ public class WeightedPool<T> {
     public T pickOne() {
         double totalChance = entries.stream().mapToDouble(a -> a.weight).sum() * API.getRng().nextDouble();
 
-        MCA.LOGGER.info(entries.stream().map(Entry::getValue).toList());
         for (WeightedPool.Entry<T> e : entries) {
             totalChance -= e.weight;
-            MCA.LOGGER.info(totalChance);
             if (totalChance <= 0.0) {
-                MCA.LOGGER.info(e.value);
                 return e.value;
             }
         }

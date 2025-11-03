@@ -9,7 +9,6 @@ import net.conczin.mca.network.Network;
 import net.conczin.mca.network.s2c.PlayerDataMessage;
 import net.conczin.mca.resources.ClothingList;
 import net.conczin.mca.resources.HairList;
-import net.conczin.mca.resources.WeightedPool;
 import net.conczin.mca.server.world.data.FamilyTree;
 import net.conczin.mca.server.world.data.FamilyTreeNode;
 import net.conczin.mca.server.world.data.PlayerSaveData;

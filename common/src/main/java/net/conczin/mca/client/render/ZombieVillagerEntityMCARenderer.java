@@ -2,14 +2,12 @@ package net.conczin.mca.client.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.conczin.mca.Config;
-import net.conczin.mca.MCA;
 import net.conczin.mca.client.model.VillagerEntityModelMCA;
 import net.conczin.mca.client.model.ZombieVillagerEntityModelMCA;
 import net.conczin.mca.client.render.layer.ClothingLayer;
 import net.conczin.mca.client.render.layer.FaceLayer;
 import net.conczin.mca.client.render.layer.HairLayer;
 import net.conczin.mca.client.render.layer.SkinLayer;
-import net.conczin.mca.entity.VillagerEntityMCA;
 import net.conczin.mca.entity.ZombieVillagerEntityMCA;
 import net.conczin.mca.entity.ai.relationship.Gender;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
