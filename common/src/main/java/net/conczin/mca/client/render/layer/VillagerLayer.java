@@ -103,10 +103,13 @@ public abstract class VillagerLayer<T extends LivingEntity, M extends HumanoidMo
 
     @Nullable
     protected RenderType getRenderLayer(ResourceLocation texture, boolean showBody, boolean translucent, boolean showOutline) {
-        if (translucent) {
-            return RenderType.itemEntityTranslucentCull(texture);
-        } else if (showBody) {
-            return this.model.renderType(texture);
+        if (showBody) {
+            // bugfix: eyes used to be visible even while using invisibility effect
+            if (translucent) {
+                return RenderType.itemEntityTranslucentCull(texture);
+            } else {
+                return this.model.renderType(texture);
+            }
         } else {
             return showOutline ? RenderType.outline(texture) : null;
         }
