@@ -46,7 +46,7 @@ request for review.
 Alternatively you can help translating MCA into your language
 on [Crowdin](https://crowdin.com/project/minecraft-comes-alive-2)!
 
-Or you can Join the [Discord Community](https://discord.com/invite/EjYwZUJbpf) for questions, suggestions or social
+Or you can join the [Discord Community](https://discord.com/invite/EjYwZUJbpf) for questions, suggestions or social
 interactions.
 
 ## Credits

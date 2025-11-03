@@ -33,7 +33,7 @@ public abstract class VillagerLayer<T extends LivingEntity, M extends HumanoidMo
         TEXTURE_EXIST_CACHE.put(MCA.locate("temp"), true);
     }
 
-    public final M model;
+    public M model;
 
     public VillagerLayer(RenderLayerParent<T, M> renderer, M model) {
         super(renderer);

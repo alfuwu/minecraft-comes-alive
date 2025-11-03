@@ -370,6 +370,16 @@ public final class Config {
      */
     public int procreationCooldown = 72000;
 
+    /**
+     * Makes female villagers have slim arms rather than full-width arms.
+     */
+    public boolean femalesUseSlimArms = true;
+
+    /**
+     * Uses the new system for female body feature scaling, rotating the model part instead of translating it backwards.
+     */
+    public boolean useNewBreastSystem = true;
+
 
     /////////////
     // Tracker //

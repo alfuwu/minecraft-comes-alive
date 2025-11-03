@@ -65,7 +65,7 @@ public class VillagerEntityModelMCA<T extends LivingEntity & VillagerLike<T>> ex
     public static MeshDefinition armorData(CubeDeformation dilation) {
         MeshDefinition modelData = HumanoidModel.createMesh(dilation, 0.0f);
         PartDefinition root = modelData.getRoot();
-        root.addOrReplaceChild(BREASTS, newBreasts(dilation, 0), PartPose.ZERO);
+        root.addOrReplaceChild(BREASTS, newBreasts(dilation.extend(-0.5f), 0), PartPose.ZERO);
         return modelData;
     }
 

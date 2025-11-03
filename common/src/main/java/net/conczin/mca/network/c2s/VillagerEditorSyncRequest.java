@@ -9,6 +9,7 @@ import net.conczin.mca.network.Network;
 import net.conczin.mca.network.s2c.PlayerDataMessage;
 import net.conczin.mca.resources.ClothingList;
 import net.conczin.mca.resources.HairList;
+import net.conczin.mca.resources.WeightedPool;
 import net.conczin.mca.server.world.data.FamilyTree;
 import net.conczin.mca.server.world.data.FamilyTreeNode;
 import net.conczin.mca.server.world.data.PlayerSaveData;
@@ -54,6 +55,7 @@ public record VillagerEditorSyncRequest(String command, UUID uuid, CompoundTag d
                 setClothing(player, entity);
                 break;
             case "gender":
+                setGender(player, entity, data());
                 setHair(player, entity);
                 setClothing(player, entity);
                 break;
@@ -128,6 +130,14 @@ public record VillagerEditorSyncRequest(String command, UUID uuid, CompoundTag d
         }
     }
 
+    private void setGender(ServerPlayer player, Entity entity, CompoundTag genderData) {
+        CompoundTag villagerData = GetVillagerRequest.getVillagerData(entity);
+        if (villagerData != null) {
+            villagerData.putInt("gender", genderData.getByte("gender"));
+            saveEntity(player, entity, villagerData);
+        }
+    }
+
     private Gender getGender(CompoundTag villagerData) {
         return Gender.byId(villagerData.getInt("gender"));
     }
@@ -171,7 +181,10 @@ public record VillagerEditorSyncRequest(String command, UUID uuid, CompoundTag d
 
         String s = villagerData.getString("CustomName");
         try {
-            entry.setName(Objects.requireNonNull(Component.Serializer.fromJson(s, entity.registryAccess())).getString());
+            if (s.isEmpty())
+                entry.setName(s);
+            else
+                entry.setName(Objects.requireNonNull(Component.Serializer.fromJson(s, entity.registryAccess())).getString());
         } catch (Exception e) {
             MCA.LOGGER.error("Failed to parse custom name for villager: {}", s, e);
         }

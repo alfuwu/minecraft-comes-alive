@@ -32,6 +32,7 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.ByteTag;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -682,7 +683,9 @@ public class VillagerEditorScreen extends Screen implements SkinListUpdateListen
     void drawGender(int x, int y) {
         genderButtonFemale = new ButtonWidget(x, y, DATA_WIDTH / 2, 20, Component.translatable("gui.villager_editor.feminine"), sender -> {
             villager.getGenetics().setGender(Gender.FEMALE);
-            sendCommand("gender");
+            CompoundTag tag = new CompoundTag();
+            tag.putByte("gender", (byte)villager.getGenetics().getGender().getId());
+            sendCommand("gender", tag);
             genderButtonFemale.active = false;
             genderButtonMale.active = true;
         });
@@ -690,7 +693,9 @@ public class VillagerEditorScreen extends Screen implements SkinListUpdateListen
 
         genderButtonMale = new ButtonWidget(x + DATA_WIDTH / 2, y, DATA_WIDTH / 2, 20, Component.translatable("gui.villager_editor.masculine"), sender -> {
             villager.getGenetics().setGender(Gender.MALE);
-            sendCommand("gender");
+            CompoundTag tag = new CompoundTag();
+            tag.putByte("gender", (byte)villager.getGenetics().getGender().getId());
+            sendCommand("gender", tag);
             genderButtonFemale.active = true;
             genderButtonMale.active = false;
         });

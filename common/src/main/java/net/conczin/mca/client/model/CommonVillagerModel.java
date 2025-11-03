@@ -2,6 +2,7 @@ package net.conczin.mca.client.model;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.conczin.mca.Config;
 import net.conczin.mca.MCAClient;
 import net.conczin.mca.entity.VillagerLike;
 import net.conczin.mca.entity.ai.relationship.Gender;
@@ -63,7 +64,7 @@ public interface CommonVillagerModel<T extends LivingEntity> {
 
             if (breastSize > 0) {
                 matrices.pushPose();
-                matrices.scale(breastSize * 0.2f + 1.05f, breastSize * 0.75f + 0.75f, breastSize * 0.75f + 0.75f);
+                matrices.scale(1.25f, 1.5f, 1.5f);
                 for (ModelPart part : getBreastParts()) {
                     part.render(matrices, vertices, light, overlay, color);
                 }
@@ -76,9 +77,13 @@ public interface CommonVillagerModel<T extends LivingEntity> {
         getDimensions().set(villager.getVillagerDimensions());
         setBreastSize(villager.getGenetics().getBreastSize());
         getBreastPart().visible = villager.getGenetics().getGender() == Gender.FEMALE;
+        boolean newSystem = Config.getInstance().useNewBreastSystem;
+        float rotation = newSystem ? 0.3f : 0.3f + (1 + (0.5f - getBreastSize() / 2));
+        float xRot = (float) Math.PI * rotation + getBodyPart().xRot;
 
         for (ModelPart part : getBreastParts()) {
-            part.xRot = (float) Math.PI * 0.3f + getBodyPart().xRot;
+            part.xRot = xRot;
+            part.yRot = getBodyPart().yRot;
 
             float cy = 0.0f;
             float cz = 0.0f;
@@ -87,7 +92,9 @@ public interface CommonVillagerModel<T extends LivingEntity> {
                 cz = 1.5f;
             }
 
-            part.setPos(0.25f, (float) (5.0f - Math.pow(getBreastSize(), 0.5) * 2.5f + cy), -1.5f + getBreastSize() * 0.25f + cz);
+            float y = newSystem ? 2.5f - cy : (float) (5.0f - Math.pow(getBreastSize(), 0.5) * 2.5f + cy);
+            float z = newSystem ? (float)Math.pow(1 - getBreastSize(), Math.PI) - 1.25f + cz : -1.5f + getBreastSize() * 0.25f + cz;
+            part.setPos(0.25f, y, z);
         }
     }
 

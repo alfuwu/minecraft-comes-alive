@@ -2,12 +2,14 @@ package net.conczin.mca.mixin.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.conczin.mca.Config;
 import net.conczin.mca.MCAClient;
 import net.conczin.mca.client.model.CommonVillagerModel;
 import net.conczin.mca.client.model.PlayerEntityExtendedModel;
 import net.conczin.mca.client.model.VillagerEntityModelMCA;
 import net.conczin.mca.client.render.layer.*;
 import net.conczin.mca.entity.ai.relationship.AgeState;
+import net.conczin.mca.entity.ai.relationship.Gender;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.builders.CubeDeformation;
@@ -37,6 +39,14 @@ public abstract class MixinPlayerRenderer extends LivingEntityRenderer<AbstractC
     @Unique
     private PlayerModel<AbstractClientPlayer> mca$villagerModel;
     @Unique
+    private PlayerModel<AbstractClientPlayer> mca$skinModel;
+    @Unique
+    private PlayerModel<AbstractClientPlayer> mca$slimSkinModel;
+    @Unique
+    private PlayerModel<AbstractClientPlayer> mca$clothingModel;
+    @Unique
+    private PlayerModel<AbstractClientPlayer> mca$slimClothingModel;
+    @Unique
     private PlayerModel<AbstractClientPlayer> mca$vanillaModel;
 
     public MixinPlayerRenderer(EntityRendererProvider.Context ctx, PlayerModel<AbstractClientPlayer> model, float shadowRadius) {
@@ -52,16 +62,20 @@ public abstract class MixinPlayerRenderer extends LivingEntityRenderer<AbstractC
     protected abstract void setModelProperties(AbstractClientPlayer abstractClientPlayer);
 
     @Inject(method = "<init>(Lnet/minecraft/client/renderer/entity/EntityRendererProvider$Context;Z)V", at = @At("TAIL"))
-    private void mca$injectInit(EntityRendererProvider.Context ctx, boolean slim, CallbackInfo ci) {
+    private void mca$injectInit(EntityRendererProvider.Context ctx, boolean playerSlim, CallbackInfo ci) {
         if (MCAClient.isPlayerRendererAllowed()) {
-            mca$villagerModel = mca$createModel(VillagerEntityModelMCA.bodyData(new CubeDeformation(0.0F), slim));
+            mca$villagerModel = mca$createModel(VillagerEntityModelMCA.bodyData(new CubeDeformation(0.0F), playerSlim));
             mca$vanillaModel = model;
 
-            mca$skinLayer = new SkinLayer<>(this, mca$createModel(VillagerEntityModelMCA.bodyData(new CubeDeformation(0.0F))));
+            mca$skinModel = mca$createModel(VillagerEntityModelMCA.bodyData(new CubeDeformation(0.0F), false));
+            mca$slimSkinModel = mca$createModel(VillagerEntityModelMCA.bodyData(new CubeDeformation(0.0F), true));
+            mca$skinLayer = new SkinLayer<>(this, mca$skinModel);
             addLayer(mca$skinLayer);
             addLayer(new FaceLayer<>(this, mca$createModel(VillagerEntityModelMCA.bodyData(new CubeDeformation(0.01F))), "normal"));
 
-            mca$clothingLayer = new ClothingLayer<>(this, mca$createModel(VillagerEntityModelMCA.bodyData(new CubeDeformation(0.0625F))), "normal");
+            mca$clothingModel = mca$createModel(VillagerEntityModelMCA.bodyData(new CubeDeformation(0.0625F), false));
+            mca$slimClothingModel = mca$createModel(VillagerEntityModelMCA.bodyData(new CubeDeformation(0.0625F), true));
+            mca$clothingLayer = new ClothingLayer<>(this, mca$clothingModel, "normal");
             addLayer(mca$clothingLayer);
             addLayer(new HairLayer<>(this, mca$createModel(VillagerEntityModelMCA.hairData(new CubeDeformation(0.125F)))));
         }
@@ -78,6 +92,15 @@ public abstract class MixinPlayerRenderer extends LivingEntityRenderer<AbstractC
             }
             ci.cancel();
 
+            boolean slim = CommonVillagerModel.getVillager(player).getGenetics().getGender() == Gender.FEMALE && Config.getInstance().femalesUseSlimArms;
+            if (slim) {
+                mca$skinLayer.model = mca$slimSkinModel;
+                mca$clothingLayer.model = mca$slimClothingModel;
+            } else {
+                mca$skinLayer.model = mca$skinModel;
+                mca$clothingLayer.model = mca$clothingModel;
+            }
+
             // switch to mca model
             model = mca$villagerModel;
         } else if (MCAClient.isPlayerRendererAllowed()) {
@@ -89,8 +112,11 @@ public abstract class MixinPlayerRenderer extends LivingEntityRenderer<AbstractC
     @Inject(method = "renderRightHand(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/client/player/AbstractClientPlayer;)V", at = @At("HEAD"), cancellable = true)
     public void mca$injectRenderRightArm(PoseStack matrices, MultiBufferSource vertexConsumers, int light, AbstractClientPlayer player, CallbackInfo ci) {
         if (MCAClient.renderArms(player.getUUID(), "right_arm")) {
-            mca$renderCustomArm(matrices, vertexConsumers, light, player, mca$skinLayer.model.rightArm, mca$skinLayer.model.rightSleeve, mca$skinLayer);
-            mca$renderCustomArm(matrices, vertexConsumers, light, player, mca$clothingLayer.model.rightArm, mca$clothingLayer.model.rightSleeve, mca$clothingLayer);
+            boolean slim = CommonVillagerModel.getVillager(player).getGenetics().getGender() == Gender.FEMALE && Config.getInstance().femalesUseSlimArms;
+            var skinModel = slim ? mca$slimSkinModel : mca$skinModel;
+            var clothingModel = slim ? mca$slimClothingModel : mca$clothingModel;
+            mca$renderCustomArm(matrices, vertexConsumers, light, player, skinModel.rightArm, skinModel.rightSleeve, mca$skinLayer);
+            mca$renderCustomArm(matrices, vertexConsumers, light, player, clothingModel.rightArm, clothingModel.rightSleeve, mca$clothingLayer);
             ci.cancel();
         }
     }
@@ -98,8 +124,11 @@ public abstract class MixinPlayerRenderer extends LivingEntityRenderer<AbstractC
     @Inject(method = "renderLeftHand(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/client/player/AbstractClientPlayer;)V", at = @At("HEAD"), cancellable = true)
     public void mca$injectRenderLeftArm(PoseStack matrices, MultiBufferSource vertexConsumers, int light, AbstractClientPlayer player, CallbackInfo ci) {
         if (MCAClient.renderArms(player.getUUID(), "left_arm")) {
-            mca$renderCustomArm(matrices, vertexConsumers, light, player, mca$skinLayer.model.leftArm, mca$skinLayer.model.leftSleeve, mca$skinLayer);
-            mca$renderCustomArm(matrices, vertexConsumers, light, player, mca$clothingLayer.model.leftArm, mca$clothingLayer.model.leftSleeve, mca$clothingLayer);
+            boolean slim = CommonVillagerModel.getVillager(player).getGenetics().getGender() == Gender.FEMALE && Config.getInstance().femalesUseSlimArms;
+            var skinModel = slim ? mca$slimSkinModel : mca$skinModel;
+            var clothingModel = slim ? mca$slimClothingModel : mca$clothingModel;
+            mca$renderCustomArm(matrices, vertexConsumers, light, player, skinModel.leftArm, skinModel.leftSleeve, mca$skinLayer);
+            mca$renderCustomArm(matrices, vertexConsumers, light, player, clothingModel.leftArm, clothingModel.leftSleeve, mca$clothingLayer);
             ci.cancel();
         }
     }
